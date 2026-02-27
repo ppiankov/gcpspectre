@@ -24,7 +24,7 @@ func TestMultiProjectScanner_ScanAll(t *testing.T) {
 		},
 	}
 
-	scanner := NewMultiProjectScanner(compute, nil, []string{"proj-a", "proj-b"}, 2, ScanConfig{IdleDays: 7, StaleDays: 90})
+	scanner := NewMultiProjectScanner(compute, nil, nil, []string{"proj-a", "proj-b"}, 2, ScanConfig{IdleDays: 7, StaleDays: 90})
 	result, err := scanner.ScanAll(context.Background())
 	if err != nil {
 		t.Fatalf("ScanAll: %v", err)
@@ -32,7 +32,8 @@ func TestMultiProjectScanner_ScanAll(t *testing.T) {
 	if result.ProjectsScanned != 2 {
 		t.Errorf("ProjectsScanned = %d, want 2", result.ProjectsScanned)
 	}
-	// 4 findings per project × 2 projects = 8
+	// 4 findings per project (instance+disk+address+snapshot) × 2 projects = 8
+	// New scanners (instancegroup, cloudsql, firewall) produce 0 findings with empty mock data
 	if len(result.Findings) != 8 {
 		t.Errorf("Findings = %d, want 8", len(result.Findings))
 	}
@@ -40,20 +41,20 @@ func TestMultiProjectScanner_ScanAll(t *testing.T) {
 
 func TestMultiProjectScanner_PartialFailure(t *testing.T) {
 	compute := &mockComputeAPI{err: errors.New("API error")}
-	scanner := NewMultiProjectScanner(compute, nil, []string{"proj-a"}, 1, ScanConfig{})
+	scanner := NewMultiProjectScanner(compute, nil, nil, []string{"proj-a"}, 1, ScanConfig{})
 	result, err := scanner.ScanAll(context.Background())
 	if err != nil {
 		t.Fatalf("ScanAll should not return error: %v", err)
 	}
-	// All 4 scanner types fail → 4 errors
-	if len(result.Errors) != 4 {
-		t.Errorf("Errors = %d, want 4", len(result.Errors))
+	// 6 scanner types using compute fail; CloudSQL scanner returns empty (nil client guard)
+	if len(result.Errors) != 6 {
+		t.Errorf("Errors = %d, want 6", len(result.Errors))
 	}
 }
 
 func TestMultiProjectScanner_DefaultConcurrency(t *testing.T) {
 	compute := &mockComputeAPI{}
-	scanner := NewMultiProjectScanner(compute, nil, []string{"proj"}, 0, ScanConfig{})
+	scanner := NewMultiProjectScanner(compute, nil, nil, []string{"proj"}, 0, ScanConfig{})
 	result, err := scanner.ScanAll(context.Background())
 	if err != nil {
 		t.Fatalf("ScanAll: %v", err)
@@ -65,7 +66,7 @@ func TestMultiProjectScanner_DefaultConcurrency(t *testing.T) {
 
 func TestMultiProjectScanner_Progress(t *testing.T) {
 	compute := &mockComputeAPI{}
-	scanner := NewMultiProjectScanner(compute, nil, []string{"proj"}, 1, ScanConfig{})
+	scanner := NewMultiProjectScanner(compute, nil, nil, []string{"proj"}, 1, ScanConfig{})
 
 	var progressCalls atomic.Int32
 	scanner.SetProgressFn(func(p ScanProgress) {
@@ -76,14 +77,15 @@ func TestMultiProjectScanner_Progress(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ScanAll: %v", err)
 	}
-	if progressCalls.Load() != 4 {
-		t.Errorf("progress calls = %d, want 4", progressCalls.Load())
+	// 7 scanner types × 1 project = 7 progress calls
+	if progressCalls.Load() != 7 {
+		t.Errorf("progress calls = %d, want 7", progressCalls.Load())
 	}
 }
 
 func TestMultiProjectScanner_EmptyProjects(t *testing.T) {
 	compute := &mockComputeAPI{}
-	scanner := NewMultiProjectScanner(compute, nil, nil, 1, ScanConfig{})
+	scanner := NewMultiProjectScanner(compute, nil, nil, nil, 1, ScanConfig{})
 	result, err := scanner.ScanAll(context.Background())
 	if err != nil {
 		t.Fatalf("ScanAll: %v", err)

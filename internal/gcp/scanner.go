@@ -20,6 +20,7 @@ type ResourceScanner interface {
 type MultiProjectScanner struct {
 	compute     ComputeAPI
 	monitoring  MonitoringAPI
+	cloudSQL    CloudSQLAPI
 	projects    []string
 	concurrency int
 	scanConfig  ScanConfig
@@ -27,13 +28,14 @@ type MultiProjectScanner struct {
 }
 
 // NewMultiProjectScanner creates a scanner that runs across the specified projects.
-func NewMultiProjectScanner(compute ComputeAPI, monitoring MonitoringAPI, projects []string, concurrency int, scanCfg ScanConfig) *MultiProjectScanner {
+func NewMultiProjectScanner(compute ComputeAPI, monitoring MonitoringAPI, cloudSQL CloudSQLAPI, projects []string, concurrency int, scanCfg ScanConfig) *MultiProjectScanner {
 	if concurrency <= 0 {
 		concurrency = 4
 	}
 	return &MultiProjectScanner{
 		compute:     compute,
 		monitoring:  monitoring,
+		cloudSQL:    cloudSQL,
 		projects:    projects,
 		concurrency: concurrency,
 		scanConfig:  scanCfg,
@@ -139,5 +141,8 @@ func (s *MultiProjectScanner) buildScanners(project string) []ResourceScanner {
 		NewDiskScanner(s.compute, project),
 		NewAddressScanner(s.compute, project),
 		NewSnapshotScanner(s.compute, project),
+		NewInstanceGroupScanner(s.compute, project),
+		NewCloudSQLScanner(s.cloudSQL, s.monitoring, project),
+		NewFirewallScanner(s.compute, project),
 	}
 }
