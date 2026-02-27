@@ -14,6 +14,7 @@ type ComputeInstance struct {
 	MachineType string // short name, e.g. "e2-medium"
 	Status      string // RUNNING, STOPPED, TERMINATED, etc.
 	Labels      map[string]string
+	Tags        []string // network tags
 	LastStarted time.Time
 	CreateTime  time.Time
 }
@@ -60,12 +61,51 @@ type DiskSnapshot struct {
 	StorageLocations []string
 }
 
+// InstanceGroupInfo represents a GCP instance group.
+type InstanceGroupInfo struct {
+	ID        uint64
+	Name      string
+	Zone      string
+	Project   string
+	Size      int
+	IsManaged bool
+}
+
+// CloudSQLInstance represents a GCP Cloud SQL instance.
+type CloudSQLInstance struct {
+	Name            string
+	Project         string
+	Region          string
+	Tier            string // e.g., "db-f1-micro"
+	State           string // RUNNABLE, STOPPED, etc.
+	DatabaseVersion string
+}
+
+// FirewallRule represents a GCP VPC firewall rule.
+type FirewallRule struct {
+	ID         uint64
+	Name       string
+	Project    string
+	Network    string
+	Direction  string // INGRESS, EGRESS
+	Priority   int64
+	TargetTags []string
+	Disabled   bool
+}
+
 // ComputeAPI abstracts GCP Compute Engine list operations.
 type ComputeAPI interface {
 	ListInstances(ctx context.Context, project string) ([]ComputeInstance, error)
 	ListDisks(ctx context.Context, project string) ([]PersistentDisk, error)
 	ListAddresses(ctx context.Context, project string) ([]StaticAddress, error)
 	ListSnapshots(ctx context.Context, project string) ([]DiskSnapshot, error)
+	ListInstanceGroups(ctx context.Context, project string) ([]InstanceGroupInfo, error)
+	ListFirewalls(ctx context.Context, project string) ([]FirewallRule, error)
+}
+
+// CloudSQLAPI abstracts GCP Cloud SQL Admin operations.
+type CloudSQLAPI interface {
+	ListInstances(ctx context.Context, project string) ([]CloudSQLInstance, error)
 }
 
 // MonitoringAPI abstracts GCP Cloud Monitoring metric queries.

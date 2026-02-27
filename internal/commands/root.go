@@ -14,7 +14,7 @@ var (
 	version  string
 	commit   string
 	date     string
-	cfg      config.Config //nolint:unused // used by scan command (Session 3)
+	cfg      config.Config
 )
 
 var rootCmd = &cobra.Command{
