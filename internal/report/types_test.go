@@ -156,8 +156,8 @@ func TestSpectreHubReporter(t *testing.T) {
 	}
 
 	output := buf.String()
-	if !strings.Contains(output, `"$schema": "spectrehub/v1"`) {
-		t.Error("missing spectrehub/v1 schema")
+	if !strings.Contains(output, `"schema": "spectre/v1"`) {
+		t.Error("missing spectre/v1 schema")
 	}
 }
 
