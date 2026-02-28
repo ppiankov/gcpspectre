@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cloud Monitoring integration for CPU utilization metrics
 - Embedded on-demand pricing data via `go:embed` for cost estimation
 - Analyzer with minimum cost filtering and summary aggregation
-- 4 output formats: text (terminal table), JSON (`spectre/v1` envelope), SARIF (v2.1.0), SpectreHub (`spectrehub/v1`)
+- 4 output formats: text (terminal table), JSON (`spectre/v1` envelope), SARIF (v2.1.0), SpectreHub (`spectre/v1`)
 - Configuration via `.gcpspectre.yaml` with `gcpspectre init` generator
 - Resource exclusion by ID and labels
 - GoReleaser config for multi-platform releases (Linux, macOS, Windows; amd64, arm64)

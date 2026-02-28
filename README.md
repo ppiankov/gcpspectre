@@ -156,7 +156,7 @@ Or grant these specific permissions:
 
 **SARIF** (`--format sarif`): SARIF v2.1.0 for GitHub Security tab integration.
 
-**SpectreHub** (`--format spectrehub`): `spectrehub/v1` envelope for SpectreHub ingestion.
+**SpectreHub** (`--format spectrehub`): `spectre/v1` envelope for SpectreHub ingestion.
 
 ## Architecture
 
