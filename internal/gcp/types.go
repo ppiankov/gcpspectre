@@ -25,27 +25,32 @@ const (
 	ResourceCloudNAT      ResourceType = "cloud_nat"
 	ResourceCloudFunction ResourceType = "cloud_function"
 	ResourceLoadBalancer  ResourceType = "load_balancer"
+	ResourcePubSub        ResourceType = "pubsub"
 )
 
 // FindingID identifies the type of waste detected.
 type FindingID string
 
 const (
-	FindingIdleInstance           FindingID = "IDLE_INSTANCE"
-	FindingStoppedInstance        FindingID = "STOPPED_INSTANCE"
-	FindingDetachedDisk           FindingID = "DETACHED_DISK"
-	FindingUnusedAddress          FindingID = "UNUSED_ADDRESS"
-	FindingStaleSnapshot          FindingID = "STALE_SNAPSHOT"
-	FindingEmptyInstanceGroup     FindingID = "EMPTY_INSTANCE_GROUP"
-	FindingUnhealthyInstanceGroup FindingID = "UNHEALTHY_INSTANCE_GROUP"
-	FindingIdleCloudSQL           FindingID = "IDLE_CLOUD_SQL"
-	FindingUnusedFirewall         FindingID = "UNUSED_FIREWALL"
-	FindingNATIdle                FindingID = "NAT_IDLE"
-	FindingNATLowTraffic          FindingID = "NAT_LOW_TRAFFIC"
-	FindingFunctionIdle           FindingID = "FUNCTION_IDLE"
-	FindingLBIdle                 FindingID = "LB_IDLE"
-	FindingLBUnhealthy            FindingID = "LB_UNHEALTHY"
-	FindingLBNoBackends           FindingID = "LB_NO_BACKENDS"
+	FindingIdleInstance              FindingID = "IDLE_INSTANCE"
+	FindingStoppedInstance           FindingID = "STOPPED_INSTANCE"
+	FindingDetachedDisk              FindingID = "DETACHED_DISK"
+	FindingUnusedAddress             FindingID = "UNUSED_ADDRESS"
+	FindingStaleSnapshot             FindingID = "STALE_SNAPSHOT"
+	FindingEmptyInstanceGroup        FindingID = "EMPTY_INSTANCE_GROUP"
+	FindingUnhealthyInstanceGroup    FindingID = "UNHEALTHY_INSTANCE_GROUP"
+	FindingIdleCloudSQL              FindingID = "IDLE_CLOUD_SQL"
+	FindingUnusedFirewall            FindingID = "UNUSED_FIREWALL"
+	FindingNATIdle                   FindingID = "NAT_IDLE"
+	FindingNATLowTraffic             FindingID = "NAT_LOW_TRAFFIC"
+	FindingFunctionIdle              FindingID = "FUNCTION_IDLE"
+	FindingLBIdle                    FindingID = "LB_IDLE"
+	FindingLBUnhealthy               FindingID = "LB_UNHEALTHY"
+	FindingLBNoBackends              FindingID = "LB_NO_BACKENDS"
+	FindingPubSubTopicIdle           FindingID = "PUBSUB_TOPIC_IDLE"
+	FindingPubSubTopicNoSubs         FindingID = "PUBSUB_TOPIC_NO_SUBSCRIPTIONS"
+	FindingPubSubSubscriptionIdle    FindingID = "PUBSUB_SUBSCRIPTION_IDLE"
+	FindingPubSubSubscriptionBacklog FindingID = "PUBSUB_SUBSCRIPTION_BACKLOG"
 )
 
 // Finding represents a single waste detection result.

@@ -180,8 +180,8 @@ func TestSarifLevel(t *testing.T) {
 
 func TestBuildSARIFRules(t *testing.T) {
 	rules := buildSARIFRules()
-	if len(rules) != 15 {
-		t.Errorf("expected 15 SARIF rules, got %d", len(rules))
+	if len(rules) != 19 {
+		t.Errorf("expected 19 SARIF rules, got %d", len(rules))
 	}
 }
 

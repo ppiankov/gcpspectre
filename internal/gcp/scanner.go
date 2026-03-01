@@ -22,6 +22,7 @@ type MultiProjectScanner struct {
 	monitoring  MonitoringAPI
 	cloudSQL    CloudSQLAPI
 	functions   CloudFunctionsAPI
+	pubsub      PubSubAPI
 	projects    []string
 	concurrency int
 	scanConfig  ScanConfig
@@ -46,6 +47,11 @@ func NewMultiProjectScanner(compute ComputeAPI, monitoring MonitoringAPI, cloudS
 // SetFunctionsAPI sets the Cloud Functions API client for function scanning.
 func (s *MultiProjectScanner) SetFunctionsAPI(functions CloudFunctionsAPI) {
 	s.functions = functions
+}
+
+// SetPubSubAPI sets the Pub/Sub API client for topic and subscription scanning.
+func (s *MultiProjectScanner) SetPubSubAPI(pubsub PubSubAPI) {
+	s.pubsub = pubsub
 }
 
 // SetProgressFn sets a callback for progress updates.
@@ -153,5 +159,6 @@ func (s *MultiProjectScanner) buildScanners(project string) []ResourceScanner {
 		NewNATScanner(s.compute, s.monitoring, project),
 		NewFunctionsScanner(s.functions, s.monitoring, project),
 		NewLBScanner(s.compute, s.monitoring, project),
+		NewPubSubScanner(s.pubsub, s.monitoring, project),
 	}
 }

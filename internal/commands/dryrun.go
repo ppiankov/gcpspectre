@@ -38,6 +38,7 @@ var scannerNames = []string{
 	"cloud_nat",
 	"cloud_function",
 	"load_balancer",
+	"pubsub",
 }
 
 func printDryRun(cmd *cobra.Command, projects []string) error {

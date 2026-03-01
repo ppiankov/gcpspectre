@@ -162,6 +162,28 @@ type CloudFunctionsAPI interface {
 	ListFunctions(ctx context.Context, project string) ([]CloudFunction, error)
 }
 
+// PubSubAPI abstracts GCP Pub/Sub Admin operations.
+type PubSubAPI interface {
+	ListTopics(ctx context.Context, project string) ([]PubSubTopic, error)
+	ListSubscriptions(ctx context.Context, project string) ([]PubSubSubscription, error)
+}
+
+// PubSubTopic represents a GCP Pub/Sub topic.
+type PubSubTopic struct {
+	Name              string
+	Project           string
+	Labels            map[string]string
+	SubscriptionCount int
+}
+
+// PubSubSubscription represents a GCP Pub/Sub subscription.
+type PubSubSubscription struct {
+	Name    string
+	Topic   string
+	Project string
+	Labels  map[string]string
+}
+
 // MonitoringAPI abstracts GCP Cloud Monitoring metric queries.
 type MonitoringAPI interface {
 	FetchMetricMean(ctx context.Context, project, metricType, resourceLabel string, resourceIDs []string, lookbackDays int) (map[string]float64, error)

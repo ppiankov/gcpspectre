@@ -117,3 +117,40 @@ func (m *mockCloudFunctionsAPI) ListFunctions(_ context.Context, _ string) ([]Cl
 	}
 	return m.functions, nil
 }
+
+// mockPubSubAPI is a test double for PubSubAPI.
+type mockPubSubAPI struct {
+	topics        []PubSubTopic
+	subscriptions []PubSubSubscription
+	err           error
+}
+
+func (m *mockPubSubAPI) ListTopics(_ context.Context, _ string) ([]PubSubTopic, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return m.topics, nil
+}
+
+func (m *mockPubSubAPI) ListSubscriptions(_ context.Context, _ string) ([]PubSubSubscription, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return m.subscriptions, nil
+}
+
+// mockMonitoringAPIMulti is a test double that returns different results per metric type.
+type mockMonitoringAPIMulti struct {
+	results map[string]map[string]float64
+	err     error
+}
+
+func (m *mockMonitoringAPIMulti) FetchMetricMean(_ context.Context, _, metricType, _ string, _ []string, _ int) (map[string]float64, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	if m.results == nil {
+		return nil, nil
+	}
+	return m.results[metricType], nil
+}

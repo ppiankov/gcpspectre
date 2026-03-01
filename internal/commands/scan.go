@@ -94,6 +94,11 @@ func runScan(cmd *cobra.Command, _ []string) error {
 		slog.Warn("Cloud Functions client unavailable, skipping function scans", "error", err)
 	}
 
+	pubsubClient, err := gcp.NewPubSubClient(ctx)
+	if err != nil {
+		slog.Warn("Pub/Sub client unavailable, skipping Pub/Sub scans", "error", err)
+	}
+
 	scanCfg := gcp.ScanConfig{
 		IdleDays:       scanFlags.idleDays,
 		StaleDays:      scanFlags.staleDays,
@@ -107,6 +112,9 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	scanner := gcp.NewMultiProjectScanner(computeClient, monitoringClient, cloudSQLClient, projectList, 4, scanCfg)
 	if functionsClient != nil {
 		scanner.SetFunctionsAPI(functionsClient)
+	}
+	if pubsubClient != nil {
+		scanner.SetPubSubAPI(pubsubClient)
 	}
 	result, err := scanner.ScanAll(ctx)
 	if err != nil {
