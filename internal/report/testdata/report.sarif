@@ -142,6 +142,42 @@
               "defaultConfiguration": {
                 "level": "error"
               }
+            },
+            {
+              "id": "PUBSUB_TOPIC_IDLE",
+              "shortDescription": {
+                "text": "Idle Pub/Sub topic"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "PUBSUB_TOPIC_NO_SUBSCRIPTIONS",
+              "shortDescription": {
+                "text": "Pub/Sub topic with no subscriptions"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "PUBSUB_SUBSCRIPTION_IDLE",
+              "shortDescription": {
+                "text": "Idle Pub/Sub subscription"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "PUBSUB_SUBSCRIPTION_BACKLOG",
+              "shortDescription": {
+                "text": "Pub/Sub subscription with message backlog"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
             }
           ]
         }

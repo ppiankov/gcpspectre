@@ -128,3 +128,9 @@ func MonthlyLBCost(region string) float64 {
 	cost, _ := lookupMonthly("load_balancer", region)
 	return cost
 }
+
+// MonthlyPubSubSubscriptionCost returns the estimated monthly cost for an idle Pub/Sub subscription.
+func MonthlyPubSubSubscriptionCost() float64 {
+	cost, _ := lookupMonthly("pubsub_subscription", "us-central1")
+	return cost
+}

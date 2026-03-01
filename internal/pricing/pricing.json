@@ -39,5 +39,8 @@
   },
   "load_balancer": {
     "default": {"us-central1": 18.26, "us-east1": 18.26, "europe-west1": 20.09, "asia-east1": 21.91}
+  },
+  "pubsub_subscription": {
+    "default": {"us-central1": 0.00, "us-east1": 0.00, "europe-west1": 0.00, "asia-east1": 0.00}
   }
 }

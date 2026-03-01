@@ -154,6 +154,10 @@ func buildSARIFRules() []sarifRule {
 		{ID: string(gcptype.FindingLBIdle), ShortDescription: sarifMessage{Text: "Idle load balancer"}, DefaultConfig: sarifDefaultLevel{Level: "warning"}},
 		{ID: string(gcptype.FindingLBUnhealthy), ShortDescription: sarifMessage{Text: "Load balancer with unhealthy backends"}, DefaultConfig: sarifDefaultLevel{Level: "error"}},
 		{ID: string(gcptype.FindingLBNoBackends), ShortDescription: sarifMessage{Text: "Load balancer with no backends"}, DefaultConfig: sarifDefaultLevel{Level: "error"}},
+		{ID: string(gcptype.FindingPubSubTopicIdle), ShortDescription: sarifMessage{Text: "Idle Pub/Sub topic"}, DefaultConfig: sarifDefaultLevel{Level: "warning"}},
+		{ID: string(gcptype.FindingPubSubTopicNoSubs), ShortDescription: sarifMessage{Text: "Pub/Sub topic with no subscriptions"}, DefaultConfig: sarifDefaultLevel{Level: "warning"}},
+		{ID: string(gcptype.FindingPubSubSubscriptionIdle), ShortDescription: sarifMessage{Text: "Idle Pub/Sub subscription"}, DefaultConfig: sarifDefaultLevel{Level: "warning"}},
+		{ID: string(gcptype.FindingPubSubSubscriptionBacklog), ShortDescription: sarifMessage{Text: "Pub/Sub subscription with message backlog"}, DefaultConfig: sarifDefaultLevel{Level: "error"}},
 	}
 }
 
