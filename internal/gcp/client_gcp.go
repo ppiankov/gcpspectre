@@ -17,12 +17,15 @@ import (
 
 // GCPComputeClient implements ComputeAPI using the GCP Compute Engine SDK.
 type GCPComputeClient struct {
-	instances      *compute.InstancesClient
-	disks          *compute.DisksClient
-	addresses      *compute.AddressesClient
-	snapshots      *compute.SnapshotsClient
-	instanceGroups *compute.InstanceGroupsClient
-	firewalls      *compute.FirewallsClient
+	instances       *compute.InstancesClient
+	disks           *compute.DisksClient
+	addresses       *compute.AddressesClient
+	snapshots       *compute.SnapshotsClient
+	instanceGroups  *compute.InstanceGroupsClient
+	firewalls       *compute.FirewallsClient
+	routers         *compute.RoutersClient
+	forwardingRules *compute.ForwardingRulesClient
+	backendServices *compute.BackendServicesClient
 }
 
 // NewComputeClient creates a ComputeAPI backed by GCP Application Default Credentials.
@@ -66,13 +69,49 @@ func NewComputeClient(ctx context.Context) (*GCPComputeClient, error) {
 		_ = instanceGroups.Close()
 		return nil, fmt.Errorf("create firewalls client: %w", err)
 	}
+	routers, err := compute.NewRoutersRESTClient(ctx)
+	if err != nil {
+		_ = instances.Close()
+		_ = disks.Close()
+		_ = addresses.Close()
+		_ = snapshots.Close()
+		_ = instanceGroups.Close()
+		_ = firewalls.Close()
+		return nil, fmt.Errorf("create routers client: %w", err)
+	}
+	forwardingRules, err := compute.NewForwardingRulesRESTClient(ctx)
+	if err != nil {
+		_ = instances.Close()
+		_ = disks.Close()
+		_ = addresses.Close()
+		_ = snapshots.Close()
+		_ = instanceGroups.Close()
+		_ = firewalls.Close()
+		_ = routers.Close()
+		return nil, fmt.Errorf("create forwarding rules client: %w", err)
+	}
+	backendServices, err := compute.NewBackendServicesRESTClient(ctx)
+	if err != nil {
+		_ = instances.Close()
+		_ = disks.Close()
+		_ = addresses.Close()
+		_ = snapshots.Close()
+		_ = instanceGroups.Close()
+		_ = firewalls.Close()
+		_ = routers.Close()
+		_ = forwardingRules.Close()
+		return nil, fmt.Errorf("create backend services client: %w", err)
+	}
 	return &GCPComputeClient{
-		instances:      instances,
-		disks:          disks,
-		addresses:      addresses,
-		snapshots:      snapshots,
-		instanceGroups: instanceGroups,
-		firewalls:      firewalls,
+		instances:       instances,
+		disks:           disks,
+		addresses:       addresses,
+		snapshots:       snapshots,
+		instanceGroups:  instanceGroups,
+		firewalls:       firewalls,
+		routers:         routers,
+		forwardingRules: forwardingRules,
+		backendServices: backendServices,
 	}, nil
 }
 
@@ -84,6 +123,9 @@ func (c *GCPComputeClient) Close() {
 	_ = c.snapshots.Close()
 	_ = c.instanceGroups.Close()
 	_ = c.firewalls.Close()
+	_ = c.routers.Close()
+	_ = c.forwardingRules.Close()
+	_ = c.backendServices.Close()
 }
 
 func (c *GCPComputeClient) ListInstances(ctx context.Context, project string) ([]ComputeInstance, error) {
@@ -190,6 +232,86 @@ func (c *GCPComputeClient) ListFirewalls(ctx context.Context, project string) ([
 	return result, nil
 }
 
+func (c *GCPComputeClient) ListRouters(ctx context.Context, project string) ([]RouterInfo, error) {
+	var result []RouterInfo
+	it := c.routers.AggregatedList(ctx, &computepb.AggregatedListRoutersRequest{Project: project})
+	for {
+		pair, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("list routers: %w", err)
+		}
+		for _, router := range pair.Value.GetRouters() {
+			ri := RouterInfo{
+				ID:      router.GetId(),
+				Name:    router.GetName(),
+				Region:  lastPathSegment(router.GetRegion()),
+				Project: project,
+			}
+			for _, nat := range router.GetNats() {
+				ri.NATs = append(ri.NATs, NATConfig{Name: nat.GetName()})
+			}
+			if len(ri.NATs) > 0 {
+				result = append(result, ri)
+			}
+		}
+	}
+	return result, nil
+}
+
+func (c *GCPComputeClient) ListForwardingRules(ctx context.Context, project string) ([]ForwardingRuleInfo, error) {
+	var result []ForwardingRuleInfo
+	it := c.forwardingRules.AggregatedList(ctx, &computepb.AggregatedListForwardingRulesRequest{Project: project})
+	for {
+		pair, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("list forwarding rules: %w", err)
+		}
+		for _, fr := range pair.Value.GetForwardingRules() {
+			result = append(result, ForwardingRuleInfo{
+				ID:                  fr.GetId(),
+				Name:                fr.GetName(),
+				Region:              lastPathSegment(fr.GetRegion()),
+				Project:             project,
+				Target:              lastPathSegment(fr.GetTarget()),
+				IPAddress:           fr.GetIPAddress(),
+				LoadBalancingScheme: fr.GetLoadBalancingScheme(),
+			})
+		}
+	}
+	return result, nil
+}
+
+func (c *GCPComputeClient) ListBackendServices(ctx context.Context, project string) ([]BackendServiceInfo, error) {
+	var result []BackendServiceInfo
+	it := c.backendServices.AggregatedList(ctx, &computepb.AggregatedListBackendServicesRequest{Project: project})
+	for {
+		pair, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("list backend services: %w", err)
+		}
+		for _, bs := range pair.Value.GetBackendServices() {
+			result = append(result, BackendServiceInfo{
+				ID:       bs.GetId(),
+				Name:     bs.GetName(),
+				Project:  project,
+				Backends: len(bs.GetBackends()),
+				Protocol: bs.GetProtocol(),
+				HealthOK: len(bs.GetBackends()) > 0, // health is determined by backend count; detailed check requires health check API
+			})
+		}
+	}
+	return result, nil
+}
+
 // GCPMonitoringClient implements MonitoringAPI using Cloud Monitoring.
 type GCPMonitoringClient struct {
 	client *monitoring.MetricClient
@@ -286,8 +408,12 @@ func (c *GCPCloudSQLClient) ListInstances(ctx context.Context, project string) (
 	var result []CloudSQLInstance
 	for _, inst := range resp.Items {
 		tier := ""
+		var labels map[string]string
 		if inst.Settings != nil {
 			tier = inst.Settings.Tier
+			if len(inst.Settings.UserLabels) > 0 {
+				labels = inst.Settings.UserLabels
+			}
 		}
 		result = append(result, CloudSQLInstance{
 			Name:            inst.Name,
@@ -296,6 +422,7 @@ func (c *GCPCloudSQLClient) ListInstances(ctx context.Context, project string) (
 			Tier:            tier,
 			State:           inst.State,
 			DatabaseVersion: inst.DatabaseVersion,
+			Labels:          labels,
 		})
 	}
 	return result, nil

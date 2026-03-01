@@ -25,9 +25,16 @@ type sarifTool struct {
 }
 
 type sarifDriver struct {
-	Name    string      `json:"name"`
-	Version string      `json:"version"`
-	Rules   []sarifRule `json:"rules"`
+	Name          string              `json:"name"`
+	Version       string              `json:"version"`
+	Rules         []sarifRule         `json:"rules"`
+	Notifications []sarifNotification `json:"notifications,omitempty"`
+}
+
+type sarifNotification struct {
+	ID      string       `json:"id"`
+	Message sarifMessage `json:"message"`
+	Level   string       `json:"level"`
 }
 
 type sarifRule struct {
@@ -100,9 +107,10 @@ func (r *SARIFReporter) Generate(data Data) error {
 			{
 				Tool: sarifTool{
 					Driver: sarifDriver{
-						Name:    data.Tool,
-						Version: data.Version,
-						Rules:   rules,
+						Name:          data.Tool,
+						Version:       data.Version,
+						Rules:         rules,
+						Notifications: buildSARIFNotifications(data.Errors),
 					},
 				},
 				Results: results,
@@ -140,5 +148,30 @@ func buildSARIFRules() []sarifRule {
 		{ID: string(gcptype.FindingUnhealthyInstanceGroup), ShortDescription: sarifMessage{Text: "Unhealthy instance group"}, DefaultConfig: sarifDefaultLevel{Level: "error"}},
 		{ID: string(gcptype.FindingIdleCloudSQL), ShortDescription: sarifMessage{Text: "Idle Cloud SQL instance"}, DefaultConfig: sarifDefaultLevel{Level: "error"}},
 		{ID: string(gcptype.FindingUnusedFirewall), ShortDescription: sarifMessage{Text: "Unused firewall rule"}, DefaultConfig: sarifDefaultLevel{Level: "note"}},
+		{ID: string(gcptype.FindingNATIdle), ShortDescription: sarifMessage{Text: "Idle Cloud NAT gateway"}, DefaultConfig: sarifDefaultLevel{Level: "warning"}},
+		{ID: string(gcptype.FindingNATLowTraffic), ShortDescription: sarifMessage{Text: "Low-traffic Cloud NAT gateway"}, DefaultConfig: sarifDefaultLevel{Level: "note"}},
+		{ID: string(gcptype.FindingFunctionIdle), ShortDescription: sarifMessage{Text: "Idle Cloud Function"}, DefaultConfig: sarifDefaultLevel{Level: "warning"}},
+		{ID: string(gcptype.FindingLBIdle), ShortDescription: sarifMessage{Text: "Idle load balancer"}, DefaultConfig: sarifDefaultLevel{Level: "warning"}},
+		{ID: string(gcptype.FindingLBUnhealthy), ShortDescription: sarifMessage{Text: "Load balancer with unhealthy backends"}, DefaultConfig: sarifDefaultLevel{Level: "error"}},
+		{ID: string(gcptype.FindingLBNoBackends), ShortDescription: sarifMessage{Text: "Load balancer with no backends"}, DefaultConfig: sarifDefaultLevel{Level: "error"}},
 	}
+}
+
+func buildSARIFNotifications(errors []ScanError) []sarifNotification {
+	if len(errors) == 0 {
+		return nil
+	}
+	notifications := make([]sarifNotification, 0, len(errors))
+	for i, e := range errors {
+		level := "warning"
+		if !e.Recoverable {
+			level = "error"
+		}
+		notifications = append(notifications, sarifNotification{
+			ID:      fmt.Sprintf("scanner-error-%d", i),
+			Message: sarifMessage{Text: e.String()},
+			Level:   level,
+		})
+	}
+	return notifications
 }

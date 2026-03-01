@@ -1,4 +1,4 @@
-.PHONY: build test clean install fmt lint vet deps coverage help
+.PHONY: build test clean install fmt lint vet deps coverage integration help
 
 BINARY_NAME := gcpspectre
 BUILD_DIR   := ./bin
@@ -48,6 +48,10 @@ install:
 deps:
 	go mod download
 	go mod tidy
+
+## integration: Run integration tests
+integration:
+	go test -tags=integration -race ./...
 
 ## coverage: Run tests with coverage report
 coverage:

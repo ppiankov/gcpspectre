@@ -20,6 +20,10 @@ var scanFlags struct {
 	outputFile     string
 	minMonthlyCost float64
 	timeout        time.Duration
+	excludeLabels  []string
+	failOn         string
+	threshold      int
+	dryRun         bool
 }
 
 var scanCmd = &cobra.Command{
@@ -40,6 +44,10 @@ func init() {
 	scanCmd.Flags().StringVarP(&scanFlags.outputFile, "output", "o", "", "Output file path (default: stdout)")
 	scanCmd.Flags().Float64Var(&scanFlags.minMonthlyCost, "min-monthly-cost", 1.0, "Minimum monthly cost to report ($)")
 	scanCmd.Flags().DurationVar(&scanFlags.timeout, "timeout", 10*time.Minute, "Scan timeout")
+	scanCmd.Flags().StringSliceVar(&scanFlags.excludeLabels, "exclude-label", nil, "Exclude resources by label (key=value or key-only, repeatable)")
+	scanCmd.Flags().StringVar(&scanFlags.failOn, "fail-on", "", "Exit non-zero when findings meet severity (high, medium, low)")
+	scanCmd.Flags().IntVar(&scanFlags.threshold, "threshold", 1, "Minimum finding count to trigger non-zero exit (requires --fail-on)")
+	scanCmd.Flags().BoolVar(&scanFlags.dryRun, "dry-run", false, "Print scan plan without executing")
 
 	rootCmd.AddCommand(scanCmd)
 }
@@ -60,6 +68,10 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	}
 	slog.Info("Scanning projects", "count", len(projectList), "projects", projectList)
 
+	if scanFlags.dryRun {
+		return printDryRun(cmd, projectList)
+	}
+
 	computeClient, err := gcp.NewComputeClient(ctx)
 	if err != nil {
 		return enhanceError("initialize GCP Compute client", err)
@@ -77,13 +89,25 @@ func runScan(cmd *cobra.Command, _ []string) error {
 		slog.Warn("Cloud SQL client unavailable, skipping SQL scans", "error", err)
 	}
 
+	functionsClient, err := gcp.NewCloudFunctionsClient(ctx)
+	if err != nil {
+		slog.Warn("Cloud Functions client unavailable, skipping function scans", "error", err)
+	}
+
 	scanCfg := gcp.ScanConfig{
 		IdleDays:       scanFlags.idleDays,
 		StaleDays:      scanFlags.staleDays,
 		MinMonthlyCost: scanFlags.minMonthlyCost,
+		Exclude: gcp.ExcludeConfig{
+			ResourceIDs: parseResourceIDs(cfg.Exclude.ResourceIDs),
+			Labels:      mergeExcludeLabels(cfg.Exclude.Labels, scanFlags.excludeLabels),
+		},
 	}
 
 	scanner := gcp.NewMultiProjectScanner(computeClient, monitoringClient, cloudSQLClient, projectList, 4, scanCfg)
+	if functionsClient != nil {
+		scanner.SetFunctionsAPI(functionsClient)
+	}
 	result, err := scanner.ScanAll(ctx)
 	if err != nil {
 		return enhanceError("scan resources", err)
@@ -109,14 +133,21 @@ func runScan(cmd *cobra.Command, _ []string) error {
 		},
 		Findings: analysis.Findings,
 		Summary:  analysis.Summary,
-		Errors:   analysis.Errors,
+		Errors:   convertToScanErrors(analysis.Errors),
 	}
 
 	reporter, err := selectReporter(scanFlags.format, scanFlags.outputFile)
 	if err != nil {
 		return err
 	}
-	return reporter.Generate(data)
+	if err := reporter.Generate(data); err != nil {
+		return err
+	}
+
+	if exitCode := report.ComputeExitCode(data.Findings, scanFlags.failOn, scanFlags.threshold); exitCode != 0 {
+		return ExitCodeError{Code: exitCode}
+	}
+	return nil
 }
 
 func resolveProjects() []string {

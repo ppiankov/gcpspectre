@@ -1,0 +1,222 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "gcpspectre",
+          "version": "0.1.0",
+          "rules": [
+            {
+              "id": "IDLE_INSTANCE",
+              "shortDescription": {
+                "text": "Idle compute instance"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "STOPPED_INSTANCE",
+              "shortDescription": {
+                "text": "Stopped compute instance"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "DETACHED_DISK",
+              "shortDescription": {
+                "text": "Detached persistent disk"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "UNUSED_ADDRESS",
+              "shortDescription": {
+                "text": "Unused static IP"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "STALE_SNAPSHOT",
+              "shortDescription": {
+                "text": "Stale snapshot"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "EMPTY_INSTANCE_GROUP",
+              "shortDescription": {
+                "text": "Empty instance group"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "UNHEALTHY_INSTANCE_GROUP",
+              "shortDescription": {
+                "text": "Unhealthy instance group"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "IDLE_CLOUD_SQL",
+              "shortDescription": {
+                "text": "Idle Cloud SQL instance"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "UNUSED_FIREWALL",
+              "shortDescription": {
+                "text": "Unused firewall rule"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "NAT_IDLE",
+              "shortDescription": {
+                "text": "Idle Cloud NAT gateway"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "NAT_LOW_TRAFFIC",
+              "shortDescription": {
+                "text": "Low-traffic Cloud NAT gateway"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "FUNCTION_IDLE",
+              "shortDescription": {
+                "text": "Idle Cloud Function"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "LB_IDLE",
+              "shortDescription": {
+                "text": "Idle load balancer"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "LB_UNHEALTHY",
+              "shortDescription": {
+                "text": "Load balancer with unhealthy backends"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "LB_NO_BACKENDS",
+              "shortDescription": {
+                "text": "Load balancer with no backends"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "IDLE_INSTANCE",
+          "level": "error",
+          "message": {
+            "text": "CPU 2.0% over 7 days"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "gcp://test-project/us-central1-a/compute_instance/100"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "estimatedMonthlyWaste": 24.46,
+            "metadata": {
+              "avg_cpu_percent": 2,
+              "machine_type": "e2-medium"
+            },
+            "resourceName": "idle-vm"
+          }
+        },
+        {
+          "ruleId": "DETACHED_DISK",
+          "level": "error",
+          "message": {
+            "text": "Detached 30 days, pd-ssd 100 GiB"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "gcp://test-project/us-central1-a/persistent_disk/200"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "estimatedMonthlyWaste": 17,
+            "metadata": {
+              "disk_type": "pd-ssd",
+              "size_gib": 100
+            },
+            "resourceName": "orphan-disk"
+          }
+        },
+        {
+          "ruleId": "UNUSED_ADDRESS",
+          "level": "warning",
+          "message": {
+            "text": "Static IP not in use"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "gcp://test-project/static_ip/addr-1"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "estimatedMonthlyWaste": 7.3,
+            "metadata": null,
+            "resourceName": ""
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -79,6 +79,7 @@ type CloudSQLInstance struct {
 	Tier            string // e.g., "db-f1-micro"
 	State           string // RUNNABLE, STOPPED, etc.
 	DatabaseVersion string
+	Labels          map[string]string
 }
 
 // FirewallRule represents a GCP VPC firewall rule.
@@ -93,6 +94,51 @@ type FirewallRule struct {
 	Disabled   bool
 }
 
+// RouterInfo represents a GCP Cloud Router with NAT configurations.
+type RouterInfo struct {
+	ID      uint64
+	Name    string
+	Region  string
+	Project string
+	NATs    []NATConfig
+}
+
+// NATConfig represents a single Cloud NAT configuration on a router.
+type NATConfig struct {
+	Name string
+}
+
+// CloudFunction represents a GCP Cloud Function (v2).
+type CloudFunction struct {
+	Name    string
+	Region  string
+	Project string
+	Runtime string
+	State   string
+	Labels  map[string]string
+}
+
+// ForwardingRuleInfo represents a GCP forwarding rule.
+type ForwardingRuleInfo struct {
+	ID                  uint64
+	Name                string
+	Region              string
+	Project             string
+	Target              string
+	IPAddress           string
+	LoadBalancingScheme string
+}
+
+// BackendServiceInfo represents a GCP backend service.
+type BackendServiceInfo struct {
+	ID       uint64
+	Name     string
+	Project  string
+	Backends int
+	Protocol string
+	HealthOK bool
+}
+
 // ComputeAPI abstracts GCP Compute Engine list operations.
 type ComputeAPI interface {
 	ListInstances(ctx context.Context, project string) ([]ComputeInstance, error)
@@ -101,11 +147,19 @@ type ComputeAPI interface {
 	ListSnapshots(ctx context.Context, project string) ([]DiskSnapshot, error)
 	ListInstanceGroups(ctx context.Context, project string) ([]InstanceGroupInfo, error)
 	ListFirewalls(ctx context.Context, project string) ([]FirewallRule, error)
+	ListRouters(ctx context.Context, project string) ([]RouterInfo, error)
+	ListForwardingRules(ctx context.Context, project string) ([]ForwardingRuleInfo, error)
+	ListBackendServices(ctx context.Context, project string) ([]BackendServiceInfo, error)
 }
 
 // CloudSQLAPI abstracts GCP Cloud SQL Admin operations.
 type CloudSQLAPI interface {
 	ListInstances(ctx context.Context, project string) ([]CloudSQLInstance, error)
+}
+
+// CloudFunctionsAPI abstracts GCP Cloud Functions list operations.
+type CloudFunctionsAPI interface {
+	ListFunctions(ctx context.Context, project string) ([]CloudFunction, error)
 }
 
 // MonitoringAPI abstracts GCP Cloud Monitoring metric queries.

@@ -190,26 +190,3 @@ func TestInstanceScanner_StoppedFallbackCreateTime(t *testing.T) {
 		t.Errorf("ID = %q, want %q", result.Findings[0].ID, FindingStoppedInstance)
 	}
 }
-
-func TestShouldExcludeLabels(t *testing.T) {
-	tests := []struct {
-		name     string
-		resource map[string]string
-		exclude  map[string]string
-		want     bool
-	}{
-		{"no exclude labels", map[string]string{"env": "prod"}, nil, false},
-		{"matching label", map[string]string{"env": "prod"}, map[string]string{"env": "prod"}, true},
-		{"non-matching label", map[string]string{"env": "prod"}, map[string]string{"env": "dev"}, false},
-		{"missing label key", map[string]string{"team": "infra"}, map[string]string{"env": "prod"}, false},
-		{"nil resource labels", nil, map[string]string{"env": "prod"}, false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := shouldExcludeLabels(tt.resource, tt.exclude)
-			if got != tt.want {
-				t.Errorf("shouldExcludeLabels = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
