@@ -49,6 +49,9 @@ func (s *CloudSQLScanner) Scan(ctx context.Context, cfg ScanConfig) (*ScanResult
 		if cfg.Exclude.ResourceIDs != nil && cfg.Exclude.ResourceIDs[inst.Name] {
 			continue
 		}
+		if shouldExcludeLabels(inst.Labels, cfg.Exclude.Labels) {
+			continue
+		}
 		if inst.State == "RUNNABLE" {
 			runnableNames = append(runnableNames, inst.Name)
 			runnableMap[inst.Name] = inst

@@ -22,6 +22,9 @@ const (
 	ResourceInstanceGroup ResourceType = "instance_group"
 	ResourceCloudSQL      ResourceType = "cloud_sql"
 	ResourceFirewall      ResourceType = "firewall_rule"
+	ResourceCloudNAT      ResourceType = "cloud_nat"
+	ResourceCloudFunction ResourceType = "cloud_function"
+	ResourceLoadBalancer  ResourceType = "load_balancer"
 )
 
 // FindingID identifies the type of waste detected.
@@ -37,6 +40,12 @@ const (
 	FindingUnhealthyInstanceGroup FindingID = "UNHEALTHY_INSTANCE_GROUP"
 	FindingIdleCloudSQL           FindingID = "IDLE_CLOUD_SQL"
 	FindingUnusedFirewall         FindingID = "UNUSED_FIREWALL"
+	FindingNATIdle                FindingID = "NAT_IDLE"
+	FindingNATLowTraffic          FindingID = "NAT_LOW_TRAFFIC"
+	FindingFunctionIdle           FindingID = "FUNCTION_IDLE"
+	FindingLBIdle                 FindingID = "LB_IDLE"
+	FindingLBUnhealthy            FindingID = "LB_UNHEALTHY"
+	FindingLBNoBackends           FindingID = "LB_NO_BACKENDS"
 )
 
 // Finding represents a single waste detection result.

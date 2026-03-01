@@ -110,3 +110,21 @@ func MonthlyCloudSQLCost(tier, region string) float64 {
 	}
 	return hourly * hoursPerMonth
 }
+
+// MonthlyNATCost returns the estimated monthly cost for a Cloud NAT gateway.
+func MonthlyNATCost(region string) float64 {
+	cost, _ := lookupMonthly("cloud_nat", region)
+	return cost
+}
+
+// MonthlyFunctionCost returns the estimated monthly base cost for an idle Cloud Function.
+func MonthlyFunctionCost(region string) float64 {
+	cost, _ := lookupMonthly("cloud_function", region)
+	return cost
+}
+
+// MonthlyLBCost returns the estimated monthly cost for a forwarding rule.
+func MonthlyLBCost(region string) float64 {
+	cost, _ := lookupMonthly("load_balancer", region)
+	return cost
+}

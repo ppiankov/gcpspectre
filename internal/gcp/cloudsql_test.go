@@ -99,6 +99,48 @@ func TestCloudSQLScanner_ExcludeByID(t *testing.T) {
 	}
 }
 
+func TestCloudSQLScanner_ExcludeByLabel(t *testing.T) {
+	cloudSQL := &mockCloudSQLAPI{
+		instances: []CloudSQLInstance{
+			{Name: "idle-db", Region: "us-central1", Tier: "db-f1-micro", State: "RUNNABLE", Labels: map[string]string{"env": "production"}},
+		},
+	}
+	monitoring := &mockMonitoringAPI{
+		results: map[string]float64{"idle-db": 0.01},
+	}
+	cfg := ScanConfig{IdleDays: 7, Exclude: ExcludeConfig{Labels: map[string]string{"env": "production"}}}
+
+	s := NewCloudSQLScanner(cloudSQL, monitoring, "proj")
+	result, err := s.Scan(context.Background(), cfg)
+	if err != nil {
+		t.Fatalf("Scan: %v", err)
+	}
+	if len(result.Findings) != 0 {
+		t.Errorf("Findings = %d, want 0 (excluded by label)", len(result.Findings))
+	}
+}
+
+func TestCloudSQLScanner_ExcludeByLabelKeyOnly(t *testing.T) {
+	cloudSQL := &mockCloudSQLAPI{
+		instances: []CloudSQLInstance{
+			{Name: "idle-db", Region: "us-central1", Tier: "db-f1-micro", State: "RUNNABLE", Labels: map[string]string{"do-not-scan": "true"}},
+		},
+	}
+	monitoring := &mockMonitoringAPI{
+		results: map[string]float64{"idle-db": 0.01},
+	}
+	cfg := ScanConfig{IdleDays: 7, Exclude: ExcludeConfig{Labels: map[string]string{"do-not-scan": ""}}}
+
+	s := NewCloudSQLScanner(cloudSQL, monitoring, "proj")
+	result, err := s.Scan(context.Background(), cfg)
+	if err != nil {
+		t.Fatalf("Scan: %v", err)
+	}
+	if len(result.Findings) != 0 {
+		t.Errorf("Findings = %d, want 0 (excluded by key-only label)", len(result.Findings))
+	}
+}
+
 func TestCloudSQLScanner_SkipStopped(t *testing.T) {
 	cloudSQL := &mockCloudSQLAPI{
 		instances: []CloudSQLInstance{

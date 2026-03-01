@@ -33,7 +33,7 @@ func TestMultiProjectScanner_ScanAll(t *testing.T) {
 		t.Errorf("ProjectsScanned = %d, want 2", result.ProjectsScanned)
 	}
 	// 4 findings per project (instance+disk+address+snapshot) × 2 projects = 8
-	// New scanners (instancegroup, cloudsql, firewall) produce 0 findings with empty mock data
+	// Other scanners (instancegroup, cloudsql, firewall, nat, functions, lb) produce 0 findings with empty mock data
 	if len(result.Findings) != 8 {
 		t.Errorf("Findings = %d, want 8", len(result.Findings))
 	}
@@ -46,9 +46,9 @@ func TestMultiProjectScanner_PartialFailure(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ScanAll should not return error: %v", err)
 	}
-	// 6 scanner types using compute fail; CloudSQL scanner returns empty (nil client guard)
-	if len(result.Errors) != 6 {
-		t.Errorf("Errors = %d, want 6", len(result.Errors))
+	// 8 scanner types using compute fail; CloudSQL + Functions return empty (nil client guard)
+	if len(result.Errors) != 8 {
+		t.Errorf("Errors = %d, want 8", len(result.Errors))
 	}
 }
 
@@ -77,9 +77,9 @@ func TestMultiProjectScanner_Progress(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ScanAll: %v", err)
 	}
-	// 7 scanner types × 1 project = 7 progress calls
-	if progressCalls.Load() != 7 {
-		t.Errorf("progress calls = %d, want 7", progressCalls.Load())
+	// 10 scanner types × 1 project = 10 progress calls
+	if progressCalls.Load() != 10 {
+		t.Errorf("progress calls = %d, want 10", progressCalls.Load())
 	}
 }
 

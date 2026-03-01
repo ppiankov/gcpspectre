@@ -4,13 +4,16 @@ import "context"
 
 // mockComputeAPI is a test double for ComputeAPI.
 type mockComputeAPI struct {
-	instances      []ComputeInstance
-	disks          []PersistentDisk
-	addresses      []StaticAddress
-	snapshots      []DiskSnapshot
-	instanceGroups []InstanceGroupInfo
-	firewalls      []FirewallRule
-	err            error
+	instances       []ComputeInstance
+	disks           []PersistentDisk
+	addresses       []StaticAddress
+	snapshots       []DiskSnapshot
+	instanceGroups  []InstanceGroupInfo
+	firewalls       []FirewallRule
+	routers         []RouterInfo
+	forwardingRules []ForwardingRuleInfo
+	backendServices []BackendServiceInfo
+	err             error
 }
 
 func (m *mockComputeAPI) ListInstances(_ context.Context, _ string) ([]ComputeInstance, error) {
@@ -55,6 +58,27 @@ func (m *mockComputeAPI) ListFirewalls(_ context.Context, _ string) ([]FirewallR
 	return m.firewalls, nil
 }
 
+func (m *mockComputeAPI) ListRouters(_ context.Context, _ string) ([]RouterInfo, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return m.routers, nil
+}
+
+func (m *mockComputeAPI) ListForwardingRules(_ context.Context, _ string) ([]ForwardingRuleInfo, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return m.forwardingRules, nil
+}
+
+func (m *mockComputeAPI) ListBackendServices(_ context.Context, _ string) ([]BackendServiceInfo, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return m.backendServices, nil
+}
+
 // mockMonitoringAPI is a test double for MonitoringAPI.
 type mockMonitoringAPI struct {
 	results map[string]float64
@@ -79,4 +103,17 @@ func (m *mockCloudSQLAPI) ListInstances(_ context.Context, _ string) ([]CloudSQL
 		return nil, m.err
 	}
 	return m.instances, nil
+}
+
+// mockCloudFunctionsAPI is a test double for CloudFunctionsAPI.
+type mockCloudFunctionsAPI struct {
+	functions []CloudFunction
+	err       error
+}
+
+func (m *mockCloudFunctionsAPI) ListFunctions(_ context.Context, _ string) ([]CloudFunction, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return m.functions, nil
 }

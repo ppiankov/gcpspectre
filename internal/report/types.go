@@ -22,7 +22,7 @@ type Data struct {
 	Config    ReportConfig      `json:"config"`
 	Findings  []gcptype.Finding `json:"findings"`
 	Summary   analyzer.Summary  `json:"summary"`
-	Errors    []string          `json:"errors,omitempty"`
+	Errors    []ScanError       `json:"errors,omitempty"`
 }
 
 // Target identifies the GCP projects being audited.

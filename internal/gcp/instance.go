@@ -134,16 +134,3 @@ func (s *InstanceScanner) Scan(ctx context.Context, cfg ScanConfig) (*ScanResult
 
 	return result, nil
 }
-
-// shouldExcludeLabels checks if a resource should be excluded based on label matching.
-func shouldExcludeLabels(resourceLabels, excludeLabels map[string]string) bool {
-	if len(excludeLabels) == 0 {
-		return false
-	}
-	for k, v := range excludeLabels {
-		if resourceLabels[k] == v {
-			return true
-		}
-	}
-	return false
-}

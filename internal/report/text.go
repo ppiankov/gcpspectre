@@ -72,7 +72,7 @@ func writeTextSummary(w *errWriter, data Data) {
 	if len(data.Errors) > 0 {
 		w.printf("\nWarnings (%d):\n", len(data.Errors))
 		for _, e := range data.Errors {
-			w.printf("  - %s\n", e)
+			w.printf("  - %s\n", e.String())
 		}
 	}
 }

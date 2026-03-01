@@ -1,0 +1,74 @@
+{
+  "$schema": "spectre/v1",
+  "tool": "gcpspectre",
+  "version": "0.1.0",
+  "timestamp": "2026-01-15T12:00:00Z",
+  "target": {
+    "type": "gcp-projects",
+    "uri_hash": "sha256:abc123"
+  },
+  "config": {
+    "projects": [
+      "test-project"
+    ],
+    "idle_days": 7,
+    "stale_days": 90,
+    "min_monthly_cost": 1
+  },
+  "findings": [
+    {
+      "id": "IDLE_INSTANCE",
+      "severity": "high",
+      "resource_type": "compute_instance",
+      "resource_id": "100",
+      "resource_name": "idle-vm",
+      "project": "test-project",
+      "zone": "us-central1-a",
+      "message": "CPU 2.0% over 7 days",
+      "estimated_monthly_waste": 24.46,
+      "metadata": {
+        "avg_cpu_percent": 2,
+        "machine_type": "e2-medium"
+      }
+    },
+    {
+      "id": "DETACHED_DISK",
+      "severity": "high",
+      "resource_type": "persistent_disk",
+      "resource_id": "200",
+      "resource_name": "orphan-disk",
+      "project": "test-project",
+      "zone": "us-central1-a",
+      "message": "Detached 30 days, pd-ssd 100 GiB",
+      "estimated_monthly_waste": 17,
+      "metadata": {
+        "disk_type": "pd-ssd",
+        "size_gib": 100
+      }
+    },
+    {
+      "id": "UNUSED_ADDRESS",
+      "severity": "medium",
+      "resource_type": "static_ip",
+      "resource_id": "addr-1",
+      "project": "test-project",
+      "message": "Static IP not in use",
+      "estimated_monthly_waste": 7.3
+    }
+  ],
+  "summary": {
+    "total_resources_scanned": 50,
+    "total_findings": 3,
+    "total_monthly_waste": 48.76,
+    "by_severity": {
+      "high": 2,
+      "medium": 1
+    },
+    "by_resource_type": {
+      "compute_instance": 1,
+      "persistent_disk": 1,
+      "static_ip": 1
+    },
+    "projects_scanned": 1
+  }
+}

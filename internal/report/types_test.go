@@ -100,7 +100,7 @@ func TestTextReporterEmpty(t *testing.T) {
 
 func TestTextReporterWithErrors(t *testing.T) {
 	data := sampleData()
-	data.Errors = []string{"zone-a: timeout"}
+	data.Errors = []ScanError{{Scanner: "my-project", ResourceType: "compute_instance", Message: "timeout", Recoverable: true}}
 
 	var buf bytes.Buffer
 	r := &TextReporter{Writer: &buf}
@@ -180,8 +180,8 @@ func TestSarifLevel(t *testing.T) {
 
 func TestBuildSARIFRules(t *testing.T) {
 	rules := buildSARIFRules()
-	if len(rules) != 9 {
-		t.Errorf("expected 9 SARIF rules, got %d", len(rules))
+	if len(rules) != 15 {
+		t.Errorf("expected 15 SARIF rules, got %d", len(rules))
 	}
 }
 
